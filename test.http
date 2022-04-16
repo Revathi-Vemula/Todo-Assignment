@@ -1,4 +1,4 @@
-get http://localhost:3000/todos/?status=IN%20PROGRESS
+get http://localhost:3000/todos/?priority=HIGH
 
 ###
 get http://localhost:3000/todos/4/
@@ -13,8 +13,20 @@ Content-Type:application/json
  "priority": "LOW",
  "status": "TO DO",
  "category": "HOME",
- "dueDate": "2021-02-22"
+ "dueDate": "2021-13-22"
 }
 
 ###
-get http://localhost:3000/agenda/?date=2021-1-1
+get http://localhost:3000/agenda/?date=2021-12-12
+
+###
+put http://localhost:3000/todos/3/
+Content-Type:application/json 
+
+{
+"status": "DONE"
+}
+
+
+###
+DELETE http://localhost:3000/todos/5/
