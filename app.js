@@ -117,17 +117,18 @@ const convertDBToResponseTodo = (dbObject) => {
 };
 
 const isValidDate = (date) => {
-  const parsedDate = parseJSON(new Date(date));
+  const parsedDate = new Date(date);
   if (isValid(parsedDate)) {
     const year = parsedDate.getFullYear();
     const day = parsedDate.getDate();
     const month = parsedDate.getMonth();
     newDate = format(new Date(year, month, day), "yyyy-MM-dd");
-    return parseJSON(newDate);
+    return newDate;
   } else {
     return "Invalid Date";
   }
 };
+
 //API 1
 app.get("/todos/", async (request, response) => {
   const { status, priority, category, search_q = "" } = request.query;
@@ -226,7 +227,7 @@ app.get("/todos/", async (request, response) => {
         break;
     }
   }
-
+  console.log(getTodosQuery);
   const todoData = await db.all(getTodosQuery);
   response.send(todoData.map((eachTodo) => convertDBToResponseTodo(eachTodo)));
 });
@@ -244,6 +245,7 @@ app.get("/todos/:todoId/", async (request, response) => {
 app.get("/agenda/", async (request, response) => {
   const { date } = request.query;
   const newDate = isValidDate(date);
+  //console.log(typeof newDate);
   if (newDate !== "Invalid Date") {
     const getAllTodosWithDueDate = `
         SELECT 
@@ -251,8 +253,10 @@ app.get("/agenda/", async (request, response) => {
         FROM 
             todo 
         WHERE 
-            due_date = ${newDate};`;
+            due_date = '${newDate}';`;
+    console.log(getAllTodosWithDueDate);
     const allTodos = await db.all(getAllTodosWithDueDate);
+    console.log(allTodos);
     response.send(
       allTodos.map((eachTodo) => convertDBToResponseTodo(eachTodo))
     );
@@ -291,11 +295,12 @@ app.post("/todos/", async (request, response) => {
 //API 5
 app.put("/todos/:todoId/", async (request, response) => {
   const { todoId } = request.params;
-  let { status, category, todo, priority, dueDate } = request.body;
+  //let { status, category, todo, priority, dueDate } = request.body;
   let updateColumn = "";
   switch (true) {
     case hasStatus(request.body):
       updateColumn = "Status";
+      const { status } = request.body;
       if (!isInValidStatus(status)) {
         response.status(400);
         response.send("Invalid Todo Status");
@@ -303,6 +308,7 @@ app.put("/todos/:todoId/", async (request, response) => {
       break;
     case hasPriority(request.body):
       updateColumn = "Priority";
+      const { priority } = request.body;
       if (!isInValidPriority(priority)) {
         response.status(400);
         response.send("Invalid Todo Priority");
@@ -310,6 +316,7 @@ app.put("/todos/:todoId/", async (request, response) => {
       break;
     case hasCategory(request.body):
       updateColumn = "Category";
+      const { category } = request.body;
       if (!isInValidCategory(category)) {
         response.status(400);
         response.send("Invalid Todo Category");
@@ -320,32 +327,34 @@ app.put("/todos/:todoId/", async (request, response) => {
       break;
     case hasDueDate(request.body):
       updateColumn = "Due Date";
-      if (isValid(dueDate)) {
+      const { dueDate } = request.body;
+      let dueDateDate = new Date(dueDate);
+      //console.log(isValid(dueDateDate));
+      if (!isValid(dueDateDate)) {
         response.status(400);
         response.send("Invalid Due Date");
       }
       break;
   }
+
   const prevTodoQuery = `SELECT * FROM todo WHERE id = ${todoId};`;
   const prevTodo = await db.get(prevTodoQuery);
-
   const {
-    status1 = prevTodo.status,
-    category1 = prevTodo.category,
-    todo1 = prevTodo.todo,
-    priority1 = prevTodo.priority,
-    dueDate1 = prevTodo.due_date,
+    status = prevTodo.status,
+    category = prevTodo.category,
+    todo = prevTodo.todo,
+    priority = prevTodo.priority,
+    dueDate = prevTodo.due_date,
   } = request.body;
-
   const updateTodoQuery = `
     UPDATE 
         todo 
     SET 
-        status = '${status1}',
-        category = '${category1}',
-        todo = '${todo1}',
-        priority = '${priority1}',
-        due_date = '${dueDate1}'
+        status = '${status}',
+        category = '${category}',
+        todo = '${todo}',
+        priority = '${priority}',
+        due_date = '${dueDate}'
     WHERE 
         id = ${todoId};`;
 
