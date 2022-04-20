@@ -8,7 +8,7 @@ post http://localhost:3000/todos/
 Content-Type:application/json 
 
 {
- "id": 5,
+ "id": 3,
  "todo": "Finalize event theme",
  "priority": "LOW",
  "status": "TO DO",
@@ -29,4 +29,4 @@ Content-Type:application/json
 
 
 ###
-DELETE http://localhost:3000/todos/4/
+DELETE http://localhost:3000/todos/6/

@@ -226,10 +226,12 @@ app.get("/todos/", async (request, response) => {
                         todo LIKE '%${search_q}%';`;
         break;
     }
+    const todoData = await db.all(getTodosQuery);
+    response.send(
+      todoData.map((eachTodo) => convertDBToResponseTodo(eachTodo))
+    );
   }
-  console.log(getTodosQuery);
-  const todoData = await db.all(getTodosQuery);
-  response.send(todoData.map((eachTodo) => convertDBToResponseTodo(eachTodo)));
+  //console.log(getTodosQuery);
 });
 
 //API 2
